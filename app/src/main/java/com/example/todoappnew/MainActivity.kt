@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -30,12 +29,12 @@ import com.example.todoappnew.presentation.navigation.TodoNavHost
 import com.example.todoappnew.presentation.ui.theme.TodoAppTheme
 import com.example.todoappnew.domain.model.TaskStatus
 import com.example.todoappnew.domain.model.AppTheme
-import com.example.todoappnew.domain.model.AppBackground
 import com.example.todoappnew.presentation.ui.screens.home.HomeViewModel
 import com.example.todoappnew.presentation.ui.screens.home.HomeEvent
 import com.example.todoappnew.presentation.ui.screens.settings.SettingsViewModel
 import com.example.todoappnew.presentation.util.BackgroundProvider
 import com.example.todoappnew.util.DynamicIconManager
+import com.example.todoappnew.presentation.ui.components.GlassmorphicBottomBar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -159,10 +158,17 @@ class MainActivity : ComponentActivity() {
                             },
                             scrimColor = Color.Black.copy(alpha = 0.32f)
                         ) {
-                            TodoNavHost(
-                                navController = navController,
-                                onOpenDrawer = { scope.launch { drawerState.open() } }
-                            )
+                            Scaffold(
+                                containerColor = Color.Transparent,
+                                bottomBar = { GlassmorphicBottomBar(navController) }
+                            ) { innerPadding ->
+                                Box(modifier = Modifier.padding(innerPadding)) {
+                                    TodoNavHost(
+                                        navController = navController,
+                                        onOpenDrawer = { scope.launch { drawerState.open() } }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
