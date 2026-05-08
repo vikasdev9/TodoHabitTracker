@@ -3,10 +3,13 @@ package com.example.todoappnew.presentation.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoappnew.domain.model.AppTheme
+import com.example.todoappnew.domain.model.AppBackground
 import com.example.todoappnew.domain.model.TaskStatus
 import com.example.todoappnew.domain.repository.TaskRepository
 import com.example.todoappnew.domain.usecase.GetThemeUseCase
 import com.example.todoappnew.domain.usecase.SetThemeUseCase
+import com.example.todoappnew.domain.usecase.GetBackgroundUseCase
+import com.example.todoappnew.domain.usecase.SetBackgroundUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,7 +22,9 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val repository: TaskRepository,
     private val getThemeUseCase: GetThemeUseCase,
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
+    private val getBackgroundUseCase: GetBackgroundUseCase,
+    private val setBackgroundUseCase: SetBackgroundUseCase
 ) : ViewModel() {
 
     // Event channel to trigger platform-specific actions (like icon switching)
@@ -28,10 +33,12 @@ class SettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         getThemeUseCase(),
+        getBackgroundUseCase(),
         repository.getDefaultFilter()
-    ) { theme, filter ->
+    ) { theme, background, filter ->
         SettingsUiState(
             theme = theme,
+            background = background,
             defaultFilter = filter.name
         )
     }.stateIn(
@@ -43,6 +50,7 @@ class SettingsViewModel @Inject constructor(
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.ThemeChanged -> updateTheme(event.theme)
+            is SettingsEvent.BackgroundChanged -> updateBackground(event.background)
             is SettingsEvent.DefaultFilterChanged -> updateDefaultFilter(event.filter)
         }
     }
@@ -51,6 +59,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             setThemeUseCase(theme)
             _themeChangedEvent.emit(theme)
+        }
+    }
+
+    private fun updateBackground(background: AppBackground) {
+        viewModelScope.launch {
+            setBackgroundUseCase(background)
         }
     }
 
