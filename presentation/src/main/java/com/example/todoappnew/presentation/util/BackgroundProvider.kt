@@ -17,6 +17,12 @@ object BackgroundProvider {
             AppBackground.LAVENDER -> Brush.verticalGradient(listOf(Color(0xFFF3E5F5), Color(0xFFE1BEE7), Color(0xFFCE93D8)))
             AppBackground.SHANGHAI -> Brush.verticalGradient(listOf(Color(0xFF4A00E0), Color(0xFF8E2DE2)))
             AppBackground.TOKYO -> Brush.verticalGradient(listOf(Color(0xFF240b36), Color(0xFFc31432)))
+            AppBackground.SAN_FRANCISCO -> Brush.verticalGradient(listOf(Color(0xFFf12711), Color(0xFFf5af19)))
+            AppBackground.SYDNEY -> Brush.verticalGradient(listOf(Color(0xFF00B4DB), Color(0xFF0083B0)))
+            AppBackground.SPRING -> Brush.verticalGradient(listOf(Color(0xFFD3CCE3), Color(0xFFE9E4F0)))
+            AppBackground.SUMMER -> Brush.verticalGradient(listOf(Color(0xFFFDC830), Color(0xFFF37335)))
+            AppBackground.AUTUMN -> Brush.verticalGradient(listOf(Color(0xFFe65c00), Color(0xFFF9D423)))
+            AppBackground.WINTER -> Brush.verticalGradient(listOf(Color(0xFF2193b0), Color(0xFF6dd5ed)))
         }
     }
 
@@ -32,6 +38,12 @@ object BackgroundProvider {
             AppBackground.LAVENDER -> listOf(Color(0xFFF3E5F5), Color(0xFFCE93D8))
             AppBackground.SHANGHAI -> listOf(Color(0xFF4A00E0), Color(0xFF8E2DE2))
             AppBackground.TOKYO -> listOf(Color(0xFF240b36), Color(0xFFc31432))
+            AppBackground.SAN_FRANCISCO -> listOf(Color(0xFFf12711), Color(0xFFf5af19))
+            AppBackground.SYDNEY -> listOf(Color(0xFF00B4DB), Color(0xFF0083B0))
+            AppBackground.SPRING -> listOf(Color(0xFFD3CCE3), Color(0xFFE9E4F0))
+            AppBackground.SUMMER -> listOf(Color(0xFFFDC830), Color(0xFFF37335))
+            AppBackground.AUTUMN -> listOf(Color(0xFFe65c00), Color(0xFFF9D423))
+            AppBackground.WINTER -> listOf(Color(0xFF2193b0), Color(0xFF6dd5ed))
         }
     }
 }

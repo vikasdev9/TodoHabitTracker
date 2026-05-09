@@ -3,25 +3,20 @@ package com.example.todoappnew
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PendingActions
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
@@ -50,7 +45,13 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        
+        // Enable full immersive edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb())
+        )
         
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
@@ -160,9 +161,10 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Scaffold(
                                 containerColor = Color.Transparent,
-                                bottomBar = { GlassmorphicBottomBar(navController) }
-                            ) { innerPadding ->
-                                Box(modifier = Modifier.padding(innerPadding)) {
+                                bottomBar = { GlassmorphicBottomBar(navController) },
+                                contentWindowInsets = WindowInsets(0, 0, 0, 0) // Full screen content
+                            ) { _ ->
+                                Box(modifier = Modifier.fillMaxSize()) {
                                     TodoNavHost(
                                         navController = navController,
                                         onOpenDrawer = { scope.launch { drawerState.open() } }

@@ -10,5 +10,11 @@ enum class AppBackground {
     MIDNIGHT,
     LAVENDER,
     SHANGHAI,
-    TOKYO
+    TOKYO,
+    SAN_FRANCISCO,
+    SYDNEY,
+    SPRING,
+    SUMMER,
+    AUTUMN,
+    WINTER
 }
