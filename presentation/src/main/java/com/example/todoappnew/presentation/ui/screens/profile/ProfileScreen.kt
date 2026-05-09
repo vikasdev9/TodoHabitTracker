@@ -1,6 +1,7 @@
 package com.example.todoappnew.presentation.ui.screens.profile
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,12 +36,33 @@ import com.example.todoappnew.presentation.ui.screens.settings.SettingsViewModel
 import com.example.todoappnew.presentation.ui.theme.GlassCardBg
 import com.example.todoappnew.presentation.ui.theme.NeonPink
 import com.example.todoappnew.presentation.ui.theme.NeonPurple
+import com.example.todoappnew.presentation.ui.theme.TodoAppTheme
 
 @Composable
 fun ProfileScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settingsState by settingsViewModel.uiState.collectAsState()
+
+    ProfileScreenContent(
+        theme = settingsState.theme,
+        background = settingsState.background,
+        onThemeChanged = {
+            settingsViewModel.onEvent(SettingsEvent.ThemeChanged(it))
+        },
+        onBackgroundChanged = {
+            settingsViewModel.onEvent(SettingsEvent.BackgroundChanged(it))
+        }
+    )
+}
+
+@Composable
+fun ProfileScreenContent(
+    theme: AppTheme,
+    background: AppBackground,
+    onThemeChanged: (AppTheme) -> Unit,
+    onBackgroundChanged: (AppBackground) -> Unit
+) {
     var displayName by remember { mutableStateOf("vikaschauhan0368") }
 
     PremiumBackground {
@@ -72,20 +98,16 @@ fun ProfileScreen(
                 }
 
                 item {
-                    AppearanceSection(settingsState.theme) {
-                        settingsViewModel.onEvent(
-                            SettingsEvent.ThemeChanged(it)
-                        )
+                    AppearanceSection(theme) {
+                        onThemeChanged(it)
                     }
                 }
 
                 item { AccentColorSection() }
 
                 item {
-                    BackgroundThemeSection(settingsState.background) {
-                        settingsViewModel.onEvent(
-                            SettingsEvent.BackgroundChanged(it)
-                        )
+                    BackgroundThemeSection(background) {
+                        onBackgroundChanged(it)
                     }
                 }
 
@@ -114,109 +136,335 @@ fun ProfileHeader() {
 }
 
 @Composable
-fun UserInfoCard(name: String) {
-    GlassCard(
+fun UserInfoCard(
+    name: String,
+    email: String = "$name@gmail.com"
+) {
+
+    val cardGradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFF4E7F5),
+            Color(0xFFEAD8EC)
+        )
+    )
+
+    Card(
         modifier = Modifier
             .padding(horizontal = 24.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+
+        Box(
+            modifier = Modifier
+                .background(cardGradient)
         ) {
-            Box(
+
+            Row(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(NeonPink.copy(alpha = 0.2f))
-                    .border(2.dp, NeonPink.copy(alpha = 0.5f), CircleShape),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    ),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = name.firstOrNull()?.toString()?.uppercase() ?: "U",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = NeonPink
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
-                )
-                Text(
-                    text = "$name@gmail.com",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.5f)
-                )
+
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFFB57BFF),
+                                    Color(0xFF9D6BFF)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(
+                        text = name.first().uppercase(),
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(18.dp))
+
+                Column {
+
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color(0xFF1E1E1E)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF6B6B6B)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun DisplayNameSection(name: String, onNameChange: (String) -> Unit) {
-    Column(modifier = Modifier.padding(24.dp)) {
-        Text(
-            text = "Display name",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            color = Color.White
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        TextField(
-            value = name,
-            onValueChange = onNameChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(GlassCardBg),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = NeonPink,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White.copy(alpha = 0.8f)
-            ),
-            shape = RoundedCornerShape(16.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { /* Save action */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = NeonPink),
-            shape = RoundedCornerShape(28.dp)
-        ) {
-            Text("Save", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
-    }
-}
+fun DisplayNameSection(
+    name: String,
+    onNameChange: (String) -> Unit
+) {
 
-@Composable
-fun AppearanceSection(selectedTheme: AppTheme, onThemeChange: (AppTheme) -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.Palette, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Appearance",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
+    val cardGradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFF4E7F5),
+            Color(0xFFE9D8EC)
+        )
+    )
+
+    Card(
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp,
+                vertical = 12.dp
             )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
+    ) {
+
+        Column(
+            modifier = Modifier
+                .background(cardGradient)
+                .padding(24.dp)
         ) {
-            ThemeCard("Light", Icons.Rounded.LightMode, selectedTheme == AppTheme.LIGHT, Modifier.weight(1f)) { onThemeChange(AppTheme.LIGHT) }
-            ThemeCard("Dark", Icons.Rounded.DarkMode, selectedTheme == AppTheme.DARK, Modifier.weight(1f)) { onThemeChange(AppTheme.DARK) }
-            ThemeCard("System", Icons.Rounded.SettingsSuggest, selectedTheme == AppTheme.SYSTEM, Modifier.weight(1f)) { onThemeChange(AppTheme.SYSTEM) }
+
+            // Title
+            Text(
+                text = "Display name",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Color(0xFF1E1E1E)
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Input
+            TextField(
+                value = name,
+                onValueChange = onNameChange,
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = TextFieldDefaults.colors(
+
+                    focusedContainerColor = Color(0xFFF7F7F7),
+                    unfocusedContainerColor = Color(0xFFF7F7F7),
+
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+
+                    cursorColor = Color(0xFF9D6BFF),
+
+                    focusedTextColor = Color(0xFF1E1E1E),
+                    unfocusedTextColor = Color(0xFF1E1E1E),
+
+                    focusedPlaceholderColor = Color.Gray,
+                    unfocusedPlaceholderColor = Color.Gray
+                ),
+                placeholder = {
+                    Text("Enter display name")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Save Button
+            Button(
+                onClick = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
+                shape = RoundedCornerShape(30.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF5C93)
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+
+                Text(
+                    text = "Save",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AppearanceSection(
+    selectedTheme: AppTheme,
+    onThemeChange: (AppTheme) -> Unit
+) {
+
+    Card(
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp,
+                vertical = 12.dp
+            )
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF1E4F1)
+        )
+    ) {
+
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Rounded.Palette,
+                    contentDescription = null,
+                    tint = Color(0xFF2D2D2D),
+                    modifier = Modifier.size(18.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Appearance",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color(0xFF2B2B2B)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                CompactThemeCard(
+                    title = "Light",
+                    icon = Icons.Rounded.LightMode,
+                    selected = selectedTheme == AppTheme.LIGHT,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    onThemeChange(AppTheme.LIGHT)
+                }
+
+                CompactThemeCard(
+                    title = "Dark",
+                    icon = Icons.Rounded.DarkMode,
+                    selected = selectedTheme == AppTheme.DARK,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    onThemeChange(AppTheme.DARK)
+                }
+
+                CompactThemeCard(
+                    title = "System",
+                    icon = Icons.Rounded.SettingsSuggest,
+                    selected = selectedTheme == AppTheme.SYSTEM,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    onThemeChange(AppTheme.SYSTEM)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CompactThemeCard(
+    title: String,
+    icon: ImageVector,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+    val bgColor =
+        if (selected) {
+            Color(0xFFFF5C93)
+        } else {
+            Color(0xFFF7F7F7)
+        }
+
+    val contentColor =
+        if (selected) {
+            Color.White
+        } else {
+            Color(0xFF2D2D2D)
+        }
+
+    Box(
+        modifier = modifier
+            .height(92.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(bgColor)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = title,
+                color = contentColor,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
@@ -242,89 +490,127 @@ fun ThemeCard(label: String, icon: androidx.compose.ui.graphics.vector.ImageVect
 
 @Composable
 fun AccentColorSection() {
+
     val colors = listOf(
-        "Blue" to Color(0xFF42A5F5),
-        "Violet" to Color(0xFF7E57C2),
-        "Emerald" to Color(0xFF66BB6A),
-        "Rose" to NeonPink,
-        "Amber" to Color(0xFFFFCA28),
-        "Cyan" to Color(0xFF26C6DA)
+        "Blue" to Color(0xFF5B8DEF),
+        "Violet" to Color(0xFF9B6DFF),
+        "Emerald" to Color(0xFF43C97A),
+        "Rose" to Color(0xFFFF5C93),
+        "Amber" to Color(0xFFF5B544),
+        "Cyan" to Color(0xFF32C7E2)
     )
-    var selectedColor by remember { mutableStateOf("Rose") }
 
-    Column(modifier = Modifier.padding(24.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.WaterDrop, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Accent color",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AccentCard(colors[0].first, colors[0].second, selectedColor == colors[0].first, Modifier.weight(1f)) { selectedColor = colors[0].first }
-                AccentCard(colors[1].first, colors[1].second, selectedColor == colors[1].first, Modifier.weight(1f)) { selectedColor = colors[1].first }
-                AccentCard(colors[2].first, colors[2].second, selectedColor == colors[2].first, Modifier.weight(1f)) { selectedColor = colors[2].first }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AccentCard(colors[3].first, colors[3].second, selectedColor == colors[3].first, Modifier.weight(1f)) { selectedColor = colors[3].first }
-                AccentCard(colors[4].first, colors[4].second, selectedColor == colors[4].first, Modifier.weight(1f)) { selectedColor = colors[4].first }
-                AccentCard(colors[5].first, colors[5].second, selectedColor == colors[5].first, Modifier.weight(1f)) { selectedColor = colors[5].first }
-            }
-        }
+    var selectedColor by remember {
+        mutableStateOf("Rose")
     }
-}
 
-@Composable
-fun AccentCard(label: String, color: Color, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Box(
-        modifier = modifier
-            .height(64.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) color.copy(alpha = 0.2f) else GlassCardBg)
-            .border(2.dp, if (isSelected) color else Color.Transparent, RoundedCornerShape(20.dp))
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+    Card(
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp,
+                vertical = 12.dp
+            )
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF1E4F1)
+        )
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(color))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(label, style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Bold)
-            if (isSelected) {
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(Icons.Rounded.Check, null, tint = color, modifier = Modifier.size(14.dp))
+
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Rounded.WaterDrop,
+                    contentDescription = null,
+                    tint = Color(0xFF2D2D2D),
+                    modifier = Modifier.size(18.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Accent color",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color(0xFF2D2D2D)
+                )
             }
-        }
-    }
-}
 
-@Composable
-fun BackgroundThemeSection(selectedBg: AppBackground, onBgChange: (AppBackground) -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.Image, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Background theme",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Grid of background themes
-        val backgrounds = AppBackground.entries
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            for (i in backgrounds.indices step 2) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    BackgroundCard(backgrounds[i], selectedBg == backgrounds[i], Modifier.weight(1f)) { onBgChange(backgrounds[i]) }
-                    if (i + 1 < backgrounds.size) {
-                        BackgroundCard(backgrounds[i + 1], selectedBg == backgrounds[i + 1], Modifier.weight(1f)) { onBgChange(backgrounds[i + 1]) }
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+
+                    AccentCard(
+                        colors[0].first,
+                        colors[0].second,
+                        selectedColor == colors[0].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[0].first
+                    }
+
+                    AccentCard(
+                        colors[1].first,
+                        colors[1].second,
+                        selectedColor == colors[1].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[1].first
+                    }
+
+                    AccentCard(
+                        colors[2].first,
+                        colors[2].second,
+                        selectedColor == colors[2].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[2].first
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+
+                    AccentCard(
+                        colors[3].first,
+                        colors[3].second,
+                        selectedColor == colors[3].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[3].first
+                    }
+
+                    AccentCard(
+                        colors[4].first,
+                        colors[4].second,
+                        selectedColor == colors[4].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[4].first
+                    }
+
+                    AccentCard(
+                        colors[5].first,
+                        colors[5].second,
+                        selectedColor == colors[5].first,
+                        Modifier.weight(1f)
+                    ) {
+                        selectedColor = colors[5].first
                     }
                 }
             }
@@ -333,43 +619,250 @@ fun BackgroundThemeSection(selectedBg: AppBackground, onBgChange: (AppBackground
 }
 
 @Composable
-fun BackgroundCard(bg: AppBackground, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+fun AccentCard(
+    label: String,
+    color: Color,
+    isSelected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+
+    val bgColor =
+        if (isSelected) {
+            color.copy(alpha = 0.95f)
+        } else {
+            Color(0xFFF8F8F8)
+        }
+
+    val textColor =
+        if (isSelected) {
+            Color.White
+        } else {
+            Color(0xFF2D2D2D)
+        }
+
     Box(
         modifier = modifier
-            .height(100.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .border(2.dp, if (isSelected) NeonPink else Color.Transparent, RoundedCornerShape(20.dp))
+            .height(74.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(bgColor)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) {
+                            Color.Transparent
+                        } else {
+                            color
+                        }
+                    )
+                    .border(
+                        width = 2.dp,
+                        color =
+                            if (isSelected) {
+                                Color.White.copy(alpha = 0.9f)
+                            } else {
+                                Color.Transparent
+                            },
+                        shape = CircleShape
+                    )
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = label,
+                color = textColor,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp
+            )
+
+            if (isSelected) {
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BackgroundThemeSection(
+    selectedBg: AppBackground,
+    onBgChange: (AppBackground) -> Unit
+) {
+
+    Card(
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp,
+                vertical = 12.dp
+            )
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF1E4F1)
+        )
+    ) {
+
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Rounded.Image,
+                    contentDescription = null,
+                    tint = Color(0xFF2D2D2D),
+                    modifier = Modifier.size(18.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Background theme",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color(0xFF2D2D2D)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val backgrounds = AppBackground.entries
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                for (i in backgrounds.indices step 2) {
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+
+                        BackgroundCard(
+                            bg = backgrounds[i],
+                            isSelected = selectedBg == backgrounds[i],
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            onBgChange(backgrounds[i])
+                        }
+
+                        if (i + 1 < backgrounds.size) {
+
+                            BackgroundCard(
+                                bg = backgrounds[i + 1],
+                                isSelected = selectedBg == backgrounds[i + 1],
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                onBgChange(backgrounds[i + 1])
+                            }
+
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BackgroundCard(
+    bg: AppBackground,
+    isSelected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+
+    Box(
+        modifier = modifier
+            .height(108.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) Color(0xFFFF5C93) else Color.Transparent,
+                shape = RoundedCornerShape(24.dp)
+            )
             .clickable { onClick() }
     ) {
-        // Mock image with gradient
+
+        // Background Preview
+//        Image(
+//            painter = painterResource(id = bg.previewRes),
+//            contentDescription = null,
+//            modifier = Modifier.fillMaxSize(),
+//            contentScale = ContentScale.Crop
+//        )
+
+        // Dark overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Gray, Color.DarkGray) // Replace with actual preview colors
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.45f)
+                        )
                     )
                 )
         )
-        Box(
+
+        // Theme Name
+        Text(
+            text = bg.name
+                .replace("_", " ")
+                .lowercase()
+                .replaceFirstChar { it.uppercase() },
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.3f)),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Text(
-                text = bg.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-            if (isSelected) {
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)
+        )
+
+        // Selected check
+        if (isSelected) {
+
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center
+            ) {
+
                 Icon(
-                    Icons.Rounded.CheckCircle,
-                    null,
-                    tint = NeonPink,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(20.dp)
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    tint = Color(0xFFFF5C93),
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -413,20 +906,62 @@ fun NotificationSection() {
 
 @Composable
 fun LogoutSection() {
+
     Button(
         onClick = { /* Logout */ },
         modifier = Modifier
-            .padding(horizontal = 24.dp)
+            .padding(
+                horizontal = 24.dp,
+                vertical = 12.dp
+            )
+            .navigationBarsPadding()
             .fillMaxWidth()
             .height(56.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = GlassCardBg),
+
+        colors = ButtonDefaults.buttonColors(
+            containerColor = GlassCardBg
+        ),
+
         shape = RoundedCornerShape(28.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+
+        border = BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = 0.1f)
+        )
+
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.AutoMirrored.Rounded.Logout, null, tint = NeonPink, modifier = Modifier.size(20.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Icon(
+                Icons.AutoMirrored.Rounded.Logout,
+                contentDescription = null,
+                tint = NeonPink,
+                modifier = Modifier.size(20.dp)
+            )
+
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Sign out", color = NeonPink, fontWeight = FontWeight.Bold)
+
+            Text(
+                "Sign out",
+                color = NeonPink,
+                fontWeight = FontWeight.Bold
+            )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    TodoAppTheme {
+        ProfileScreenContent(
+            theme = AppTheme.DARK,
+            background = AppBackground.AURORA,
+            onThemeChanged = {},
+            onBackgroundChanged = {}
+        )
     }
 }

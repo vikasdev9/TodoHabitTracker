@@ -282,7 +282,8 @@ fun NeonFAB(onClick: () -> Unit) {
         contentColor = Color.White,
         shape = CircleShape,
         modifier = Modifier
-            .size(64.dp)
+            .size(72.dp)
+            .offset(y = (-18).dp)
             .shadow(
                 elevation = 20.dp,
                 shape = CircleShape,
