@@ -881,33 +881,103 @@ fun BackgroundCard(
 
 @Composable
 fun NotificationSection() {
-    var isEnabled by remember { mutableStateOf(true) }
-    GlassCard(
+
+    var isEnabled by remember {
+        mutableStateOf(true)
+    }
+
+    Card(
         modifier = Modifier
-            .padding(24.dp)
-            .fillMaxWidth()
+            .padding(
+                horizontal = 24.dp,
+                vertical = 12.dp
+            )
+            .fillMaxWidth(),
+
+        shape = RoundedCornerShape(28.dp),
+
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFE8D9EA)
+        ),
+
+        border = BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = 0.4f)
+        )
     ) {
+
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 18.dp,
+                    vertical = 16.dp
+                ),
+
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Notifications, null, tint = Color.White.copy(alpha = 0.7f))
-                Spacer(modifier = Modifier.width(16.dp))
+
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Rounded.NotificationsNone,
+                    contentDescription = null,
+
+                    tint = Color(0xFF2A2A2A),
+
+                    modifier = Modifier.size(22.dp)
+                )
+
+                Spacer(modifier = Modifier.width(14.dp))
+
                 Column {
-                    Text("Notifications", style = MaterialTheme.typography.bodyLarge, color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("Reminders for due tasks", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.5f))
+
+                    Text(
+                        text = "Notifications",
+
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+
+                        color = Color(0xFF1E1E1E)
+                    )
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = "Reminders for due tasks",
+
+                        style = MaterialTheme.typography.bodySmall,
+
+                        color = Color(0xFF666666)
+                    )
                 }
             }
+
             Switch(
                 checked = isEnabled,
-                onCheckedChange = { isEnabled = it },
+
+                onCheckedChange = {
+                    isEnabled = it
+                },
+
                 colors = SwitchDefaults.colors(
+
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = NeonPink,
-                    uncheckedThumbColor = Color.Gray,
-                    uncheckedTrackColor = GlassCardBg
+
+                    checkedTrackColor = Color(0xFF9B6DFF),
+
+                    uncheckedThumbColor = Color.White,
+
+                    uncheckedTrackColor = Color.LightGray,
+
+                    checkedBorderColor = Color.Transparent,
+
+                    uncheckedBorderColor = Color.Transparent
                 )
             )
         }
@@ -919,6 +989,7 @@ fun LogoutSection() {
 
     Button(
         onClick = { /* Logout */ },
+
         modifier = Modifier
             .padding(
                 horizontal = 24.dp,
@@ -926,38 +997,48 @@ fun LogoutSection() {
             )
             .navigationBarsPadding()
             .fillMaxWidth()
-            .height(56.dp),
+            .height(58.dp),
 
         colors = ButtonDefaults.buttonColors(
-            containerColor = GlassCardBg
+            containerColor = Color(0xFFE8D9EA)
         ),
 
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(30.dp),
 
         border = BorderStroke(
             1.dp,
-            Color.White.copy(alpha = 0.1f)
-        )
+            Color.White.copy(alpha = 0.25f)
+        ),
 
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp
+        )
     ) {
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
 
             Icon(
-                Icons.AutoMirrored.Rounded.Logout,
+                imageVector = Icons.AutoMirrored.Rounded.Logout,
                 contentDescription = null,
+
                 tint = NeonPink,
-                modifier = Modifier.size(20.dp)
+
+                modifier = Modifier.size(18.dp)
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Text(
-                "Sign out",
+                text = "Sign out",
+
                 color = NeonPink,
-                fontWeight = FontWeight.Bold
+
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold
+                )
             )
         }
     }

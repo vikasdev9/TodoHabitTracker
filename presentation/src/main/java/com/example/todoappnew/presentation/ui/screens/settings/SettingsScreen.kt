@@ -5,20 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +37,28 @@ fun SettingsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val backgroundItems = remember {
+        listOf(
+            AppBackground.DEFAULT to "Default",
+            AppBackground.AURORA to "Aurora",
+            AppBackground.SUNSET to "Sunset",
+            AppBackground.OCEAN to "Ocean",
+            AppBackground.MINT to "Mint",
+            AppBackground.PEACH to "Peach",
+            AppBackground.MIDNIGHT to "Midnight",
+            AppBackground.LAVENDER to "Lavender",
+            AppBackground.SHANGHAI to "Shanghai",
+            AppBackground.TOKYO to "Tokyo",
+            AppBackground.SAN_FRANCISCO to "San Francisco",
+            AppBackground.SYDNEY to "Sydney",
+            AppBackground.SPRING to "Spring",
+            AppBackground.SUMMER to "Summer",
+            AppBackground.AUTUMN to "Autumn",
+            AppBackground.WINTER to "Winter",
+            AppBackground.AURORA_SKY to "Aurora Sky"
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,23 +74,43 @@ fun SettingsScreen(
             )
         }
     ) { padding ->
-        Column(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ThemeSettingsSection(
-                selectedTheme = state.theme,
-                onThemeSelected = { viewModel.onEvent(SettingsEvent.ThemeChanged(it)) }
-            )
+            item(span = { GridItemSpan(2) }) {
+                ThemeSettingsSection(
+                    selectedTheme = state.theme,
+                    onThemeSelected = { viewModel.onEvent(SettingsEvent.ThemeChanged(it)) }
+                )
+            }
             
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            item(span = { GridItemSpan(2) }) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            }
 
-            BackgroundSettingsSection(
-                selectedBackground = state.background,
-                onBackgroundSelected = { viewModel.onEvent(SettingsEvent.BackgroundChanged(it)) }
-            )
+            item(span = { GridItemSpan(2) }) {
+                Text(
+                    text = "Background theme",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
+            items(backgroundItems) { (bg, label) ->
+                BackgroundThumbnail(
+                    bg = bg,
+                    label = label,
+                    isSelected = state.background == bg,
+                    onClick = { viewModel.onEvent(SettingsEvent.BackgroundChanged(bg)) }
+                )
+            }
         }
     }
 }
@@ -81,7 +120,7 @@ fun ThemeSettingsSection(
     selectedTheme: AppTheme,
     onThemeSelected: (AppTheme) -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column {
         Text(
             text = "App Theme",
             style = MaterialTheme.typography.titleMedium,
@@ -136,57 +175,6 @@ fun ThemeOption(
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 16.dp)
         )
-    }
-}
-
-@Composable
-fun BackgroundSettingsSection(
-    selectedBackground: AppBackground,
-    onBackgroundSelected: (AppBackground) -> Unit
-) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = "Background theme",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        val backgroundItems = listOf(
-            AppBackground.DEFAULT to "Default",
-            AppBackground.AURORA to "Aurora",
-            AppBackground.SUNSET to "Sunset",
-            AppBackground.OCEAN to "Ocean",
-            AppBackground.MINT to "Mint",
-            AppBackground.PEACH to "Peach",
-            AppBackground.MIDNIGHT to "Midnight",
-            AppBackground.LAVENDER to "Lavender",
-            AppBackground.SHANGHAI to "Shanghai",
-            AppBackground.TOKYO to "Tokyo",
-            AppBackground.SAN_FRANCISCO to "San Francisco",
-            AppBackground.SYDNEY to "Sydney",
-            AppBackground.SPRING to "Spring",
-            AppBackground.SUMMER to "Summer",
-            AppBackground.AUTUMN to "Autumn",
-            AppBackground.WINTER to "Winter",
-            AppBackground.AURORA_SKY to "Aurora Sky"
-        )
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.height(650.dp) // Height increased for new items
-        ) {
-            items(backgroundItems) { (bg, label) ->
-                BackgroundThumbnail(
-                    bg = bg,
-                    label = label,
-                    isSelected = selectedBackground == bg,
-                    onClick = { onBackgroundSelected(bg) }
-                )
-            }
-        }
     }
 }
 
