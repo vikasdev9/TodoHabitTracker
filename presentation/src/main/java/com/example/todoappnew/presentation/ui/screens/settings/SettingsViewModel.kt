@@ -10,6 +10,7 @@ import com.example.todoappnew.domain.usecase.GetThemeUseCase
 import com.example.todoappnew.domain.usecase.SetThemeUseCase
 import com.example.todoappnew.domain.usecase.GetBackgroundUseCase
 import com.example.todoappnew.domain.usecase.SetBackgroundUseCase
+import com.example.todoappnew.presentation.PreviewStateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,21 +25,27 @@ class SettingsViewModel @Inject constructor(
     private val getThemeUseCase: GetThemeUseCase,
     private val setThemeUseCase: SetThemeUseCase,
     private val getBackgroundUseCase: GetBackgroundUseCase,
-    private val setBackgroundUseCase: SetBackgroundUseCase
+    private val setBackgroundUseCase: SetBackgroundUseCase,
+    private val previewStateManager: PreviewStateManager
 ) : ViewModel() {
 
     // Event channel to trigger platform-specific actions (like icon switching)
     private val _themeChangedEvent = MutableSharedFlow<AppTheme>()
     val themeChangedEvent = _themeChangedEvent.asSharedFlow()
 
+    private val _previewBackground = MutableStateFlow<AppBackground?>(null)
+
     val uiState: StateFlow<SettingsUiState> = combine(
         getThemeUseCase(),
         getBackgroundUseCase(),
-        repository.getDefaultFilter()
-    ) { theme, background, filter ->
+        repository.getDefaultFilter(),
+        _previewBackground
+    ) { theme, background, filter, preview ->
+        previewStateManager.setPreviewActive(preview != null)
         SettingsUiState(
             theme = theme,
             background = background,
+            selectedPreviewBackground = preview,
             defaultFilter = filter.name
         )
     }.stateIn(
@@ -50,7 +57,16 @@ class SettingsViewModel @Inject constructor(
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.ThemeChanged -> updateTheme(event.theme)
-            is SettingsEvent.BackgroundChanged -> updateBackground(event.background)
+            is SettingsEvent.BackgroundChanged -> {
+                updateBackground(event.background)
+                _previewBackground.value = null
+            }
+            is SettingsEvent.ShowPreview -> {
+                _previewBackground.value = event.background
+            }
+            is SettingsEvent.DismissPreview -> {
+                _previewBackground.value = null
+            }
             is SettingsEvent.DefaultFilterChanged -> updateDefaultFilter(event.filter)
         }
     }

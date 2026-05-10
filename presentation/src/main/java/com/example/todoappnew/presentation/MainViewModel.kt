@@ -9,11 +9,23 @@ import com.example.todoappnew.domain.usecase.GetThemeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class PreviewStateManager @Inject constructor() {
+    private val _isPreviewActive = MutableStateFlow(false)
+    val isPreviewActive = _isPreviewActive.asStateFlow()
+
+    fun setPreviewActive(active: Boolean) {
+        _isPreviewActive.value = active
+    }
+}
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     getThemeUseCase: GetThemeUseCase,
-    getBackgroundUseCase: GetBackgroundUseCase
+    getBackgroundUseCase: GetBackgroundUseCase,
+    val previewStateManager: PreviewStateManager
 ) : ViewModel() {
 
     val theme: StateFlow<AppTheme> = getThemeUseCase()
@@ -29,4 +41,6 @@ class MainViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = AppBackground.DEFAULT
         )
+
+    val isPreviewActive: StateFlow<Boolean> = previewStateManager.isPreviewActive
 }

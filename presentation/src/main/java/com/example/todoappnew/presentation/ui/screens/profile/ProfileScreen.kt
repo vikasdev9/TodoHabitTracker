@@ -1,6 +1,7 @@
 package com.example.todoappnew.presentation.ui.screens.profile
 
 import androidx.compose.animation.core.*
+import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,11 +50,18 @@ fun ProfileScreen(
     ProfileScreenContent(
         theme = settingsState.theme,
         background = settingsState.background,
+        selectedPreviewBackground = settingsState.selectedPreviewBackground,
         onThemeChanged = {
             settingsViewModel.onEvent(SettingsEvent.ThemeChanged(it))
         },
         onBackgroundChanged = {
             settingsViewModel.onEvent(SettingsEvent.BackgroundChanged(it))
+        },
+        onShowPreview = {
+            settingsViewModel.onEvent(SettingsEvent.ShowPreview(it))
+        },
+        onDismissPreview = {
+            settingsViewModel.onEvent(SettingsEvent.DismissPreview)
         }
     )
 }
@@ -62,60 +70,80 @@ fun ProfileScreen(
 fun ProfileScreenContent(
     theme: AppTheme,
     background: AppBackground,
+    selectedPreviewBackground: AppBackground?,
     onThemeChanged: (AppTheme) -> Unit,
-    onBackgroundChanged: (AppBackground) -> Unit
+    onBackgroundChanged: (AppBackground) -> Unit,
+    onShowPreview: (AppBackground) -> Unit,
+    onDismissPreview: () -> Unit
 ) {
     var displayName by remember { mutableStateOf("vikaschauhan0368") }
 
-    PremiumBackground(background = background) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            contentWindowInsets = WindowInsets(0, 0, 0, 0)
-        ) { padding ->
+    Box(modifier = Modifier.fillMaxSize()) {
+        PremiumBackground(background = background) {
+            Scaffold(
+                containerColor = Color.Transparent,
+                contentWindowInsets = WindowInsets(0, 0, 0, 0)
+            ) { padding ->
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
 
-                contentPadding = PaddingValues(
-                    top = WindowInsets.statusBars
-                        .asPaddingValues()
-                        .calculateTopPadding() + 24.dp,
+                    contentPadding = PaddingValues(
+                        top = WindowInsets.statusBars
+                            .asPaddingValues()
+                            .calculateTopPadding() + 24.dp,
 
-                    bottom = WindowInsets.navigationBars
-                        .asPaddingValues()
-                        .calculateBottomPadding() + 100.dp
+                        bottom = WindowInsets.navigationBars
+                            .asPaddingValues()
+                            .calculateBottomPadding() + 100.dp
+                    )
+                ) {
+
+                    item { ProfileHeader() }
+
+                    item { UserInfoCard(displayName) }
+
+                    item {
+                        DisplayNameSection(displayName) {
+                            displayName = it
+                        }
+                    }
+
+                    item {
+                        AppearanceSection(theme) {
+                            onThemeChanged(it)
+                        }
+                    }
+
+                    item { AccentColorSection() }
+
+                    item {
+                        BackgroundThemeSection(background) {
+                            onShowPreview(it)
+                        }
+                    }
+
+                    item { NotificationSection() }
+
+                    item { LogoutSection() }
+                }
+            }
+        }
+
+        // Preview Overlay
+        AnimatedVisibility(
+            visible = selectedPreviewBackground != null,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it }
+        ) {
+            selectedPreviewBackground?.let { previewBg ->
+                com.example.todoappnew.presentation.ui.screens.settings.BackgroundPreviewScreen(
+                    background = previewBg,
+                    onCancel = onDismissPreview,
+                    onConfirm = { onBackgroundChanged(previewBg) }
                 )
-            ) {
-
-                item { ProfileHeader() }
-
-                item { UserInfoCard(displayName) }
-
-                item {
-                    DisplayNameSection(displayName) {
-                        displayName = it
-                    }
-                }
-
-                item {
-                    AppearanceSection(theme) {
-                        onThemeChanged(it)
-                    }
-                }
-
-                item { AccentColorSection() }
-
-                item {
-                    BackgroundThemeSection(background) {
-                        onBackgroundChanged(it)
-                    }
-                }
-
-                item { NotificationSection() }
-
-                item { LogoutSection() }
             }
         }
     }
@@ -1051,8 +1079,11 @@ fun ProfileScreenPreview() {
         ProfileScreenContent(
             theme = AppTheme.DARK,
             background = AppBackground.AURORA,
+            selectedPreviewBackground = null,
             onThemeChanged = {},
-            onBackgroundChanged = {}
+            onBackgroundChanged = {},
+            onShowPreview = {},
+            onDismissPreview = {}
         )
     }
 }

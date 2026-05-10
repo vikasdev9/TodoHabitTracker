@@ -1,5 +1,6 @@
 package com.example.todoappnew.presentation.ui.screens.settings
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,56 +60,74 @@ fun SettingsScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Settings") },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
                     }
+                )
+            }
+        ) { padding ->
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item(span = { GridItemSpan(2) }) {
+                    ThemeSettingsSection(
+                        selectedTheme = state.theme,
+                        onThemeSelected = { viewModel.onEvent(SettingsEvent.ThemeChanged(it)) }
+                    )
                 }
-            )
+                
+                item(span = { GridItemSpan(2) }) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                }
+
+                item(span = { GridItemSpan(2) }) {
+                    Text(
+                        text = "Background theme",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
+                items(backgroundItems) { (bg, label) ->
+                    BackgroundThumbnail(
+                        bg = bg,
+                        label = label,
+                        isSelected = state.background == bg,
+                        onClick = { viewModel.onEvent(SettingsEvent.ShowPreview(bg)) }
+                    )
+                }
+            }
         }
-    ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+
+        // Preview Overlay - Moved outside Scaffold to cover TopAppBar
+        AnimatedVisibility(
+            visible = state.selectedPreviewBackground != null,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it }
         ) {
-            item(span = { GridItemSpan(2) }) {
-                ThemeSettingsSection(
-                    selectedTheme = state.theme,
-                    onThemeSelected = { viewModel.onEvent(SettingsEvent.ThemeChanged(it)) }
-                )
-            }
-            
-            item(span = { GridItemSpan(2) }) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            }
-
-            item(span = { GridItemSpan(2) }) {
-                Text(
-                    text = "Background theme",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-            }
-
-            items(backgroundItems) { (bg, label) ->
-                BackgroundThumbnail(
-                    bg = bg,
-                    label = label,
-                    isSelected = state.background == bg,
-                    onClick = { viewModel.onEvent(SettingsEvent.BackgroundChanged(bg)) }
+            state.selectedPreviewBackground?.let { previewBg ->
+                BackgroundPreviewScreen(
+                    background = previewBg,
+                    onCancel = { viewModel.onEvent(SettingsEvent.DismissPreview) },
+                    onConfirm = { viewModel.onEvent(SettingsEvent.BackgroundChanged(previewBg)) }
                 )
             }
         }
@@ -193,8 +212,8 @@ fun BackgroundThumbnail(
             .fillMaxWidth()
             .aspectRatio(1.6f)
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .background(backgroundBrush),
+            .background(backgroundBrush)
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         if (backgroundImage != null) {

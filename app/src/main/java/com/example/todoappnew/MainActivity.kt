@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
             val mainViewModel: MainViewModel = hiltViewModel()
             val currentTheme by mainViewModel.theme.collectAsState()
             val currentBackground by mainViewModel.background.collectAsState()
+            val isPreviewActive by mainViewModel.isPreviewActive.collectAsState()
 
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             
@@ -150,7 +151,11 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Scaffold(
                                 containerColor = Color.Transparent,
-                                bottomBar = { GlassmorphicBottomBar(navController) },
+                                bottomBar = {
+                                    if (!isPreviewActive) {
+                                        GlassmorphicBottomBar(navController)
+                                    }
+                                },
                                 contentWindowInsets = WindowInsets(0, 0, 0, 0) // Full screen content
                             ) { _ ->
                                 Box(modifier = Modifier.fillMaxSize()) {
