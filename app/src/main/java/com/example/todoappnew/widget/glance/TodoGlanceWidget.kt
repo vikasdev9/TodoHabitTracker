@@ -4,16 +4,13 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.GlanceId
-import androidx.glance.GlanceModifier
-import androidx.glance.GlanceTheme
+import androidx.glance.*
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.layout.*
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -26,7 +23,6 @@ import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.runBlocking
-import java.text.SimpleDateFormat
 import java.util.*
 
 class TodoGlanceWidget : GlanceAppWidget() {
@@ -66,19 +62,55 @@ class TodoGlanceWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
-                .padding(8.dp)
+                .padding(16.dp)
                 .clickable(actionStartActivity<MainActivity>())
         ) {
-            Text(
-                text = "Today's Tasks",
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = GlanceTheme.colors.onSurface
-                )
-            )
+            // Header: "Today [count] +"
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Today",
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = GlanceTheme.colors.primary
+                        )
+                    )
+                    Spacer(GlanceModifier.width(8.dp))
+                    Text(
+                        text = tasks.size.toString(),
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        )
+                    )
+                }
+                
+                Spacer(GlanceModifier.defaultWeight())
+                
+                // Add Task Button
+                Box(
+                    modifier = GlanceModifier
+                        .size(32.dp)
+                        .background(GlanceTheme.colors.primaryContainer)
+                        .clickable(actionStartActivity<MainActivity>()),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "+",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GlanceTheme.colors.onPrimaryContainer
+                        )
+                    )
+                }
+            }
             
-            Spacer(GlanceModifier.height(8.dp))
+            Spacer(GlanceModifier.height(16.dp))
             
             if (tasks.isEmpty()) {
                 Box(
@@ -86,8 +118,11 @@ class TodoGlanceWidget : GlanceAppWidget() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No tasks for today",
-                        style = TextStyle(color = GlanceTheme.colors.onSurface)
+                        text = "All tasks completed! ✨",
+                        style = TextStyle(
+                            color = GlanceTheme.colors.onSurfaceVariant,
+                            fontSize = 14.sp
+                        )
                     )
                 }
             } else {
@@ -102,25 +137,28 @@ class TodoGlanceWidget : GlanceAppWidget() {
 
     @Composable
     private fun TaskItem(task: TaskEntity) {
-        Column(
+        Row(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Minimalist Square Checkbox
+            Box(
+                modifier = GlanceModifier
+                    .size(18.dp)
+                    .background(GlanceTheme.colors.secondaryContainer)
+            ) {
+            }
+            
+            Spacer(GlanceModifier.width(12.dp))
+            
             Text(
                 text = task.title,
+                maxLines = 1,
                 style = TextStyle(
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     color = GlanceTheme.colors.onSurface
-                )
-            )
-            val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(task.scheduledTime))
-            Text(
-                text = time,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 12.sp
                 )
             )
         }

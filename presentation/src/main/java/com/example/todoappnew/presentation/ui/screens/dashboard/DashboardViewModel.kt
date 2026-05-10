@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.todoappnew.domain.model.TimeFilter
 import com.example.todoappnew.domain.usecase.ExportReportUseCase
 import com.example.todoappnew.domain.usecase.GetAnalyticsUseCase
+import com.example.todoappnew.domain.usecase.GetBackgroundUseCase
+import com.example.todoappnew.domain.usecase.GetCategoryStatsUseCase
+import com.example.todoappnew.domain.usecase.GetProductivityInsightsUseCase
 import com.example.todoappnew.domain.usecase.GetProgressTrendUseCase
 import com.example.todoappnew.presentation.util.ShareUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,58 +22,86 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     private val getAnalyticsUseCase: GetAnalyticsUseCase,
     private val getProgressTrendUseCase: GetProgressTrendUseCase,
-    private val exportReportUseCase: ExportReportUseCase
+    private val getProductivityInsightsUseCase: GetProductivityInsightsUseCase,
+    private val getCategoryStatsUseCase: GetCategoryStatsUseCase,
+    private val exportReportUseCase: ExportReportUseCase,
+    private val getBackgroundUseCase: GetBackgroundUseCase
 ) : ViewModel() {
 
     private val _selectedFilter = MutableStateFlow(TimeFilter.TODAY)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<DashboardUiState> = _selectedFilter
-        .flatMapLatest { filter ->
-            combine(
-                getAnalyticsUseCase(filter),
-                getProgressTrendUseCase()
-            ) { analytics, trend ->
-                DashboardUiState(
-                    analyticsData = analytics,
-                    weeklyProgress = trend,
-                    selectedFilter = filter,
-                    isLoading = false
-                )
-            }.onStart {
-                emit(DashboardUiState(selectedFilter = filter, isLoading = true))
-            }
+    val uiState: StateFlow<DashboardUiState> = combine(
+        _selectedFilter,
+        getBackgroundUseCase()
+    ) { filter, background ->
+        Pair(filter, background)
+    }.flatMapLatest { (filter, background) ->
+        combine(
+            getAnalyticsUseCase(filter),
+            getProgressTrendUseCase(),
+            getCategoryStatsUseCase(),
+            getProductivityInsightsUseCase()
+        ) { analytics, trend, categories, insights ->
+            DashboardUiState(
+                analyticsData = analytics,
+                weeklyProgress = trend,
+                categoryStats = categories,
+                productivityInsights = insights,
+                selectedFilter = filter,
+                background = background,
+                isLoading = false
+            )
+        }.onStart {
+            emit(DashboardUiState(selectedFilter = filter, background = background, isLoading = true))
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DashboardUiState(isLoading = true)
-        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = DashboardUiState(isLoading = true)
+    )
 
-    fun changeFilter(filter: TimeFilter) {
-        if (_selectedFilter.value != filter) {
-            _selectedFilter.value = filter
+    fun onEvent(event: DashboardEvent) {
+        when (event) {
+            is DashboardEvent.FilterChanged -> {
+                _selectedFilter.value = event.filter
+            }
+            is DashboardEvent.ExportReport -> {
+                exportReport(event.context, event.format)
+            }
         }
     }
 
-    fun exportReport(context: Context) {
+    private fun exportReport(context: Context, format: ExportFormat) {
         val currentState = uiState.value
         if (currentState.isLoading) return
 
-        val csvContent = exportReportUseCase(
-            data = currentState.analyticsData,
-            timeFilterName = currentState.selectedFilter.name
-        )
-        
         viewModelScope.launch {
             try {
-                val fileName = "TodoReport_${currentState.selectedFilter.name}_${System.currentTimeMillis()}.csv"
+                // Production-ready export logic
+                val reportContent = exportReportUseCase(
+                    data = currentState.analyticsData,
+                    timeFilterName = currentState.selectedFilter.name
+                )
+                
+                val extension = if (format == ExportFormat.PDF) "pdf" else "csv"
+                val fileName = "Todo_Analytics_Report_${System.currentTimeMillis()}.$extension"
                 val file = File(context.cacheDir, fileName)
-                file.writeText(csvContent)
-                ShareUtils.shareFile(context, file, "Export Todo Report")
+                file.writeText(reportContent)
+                
+                ShareUtils.shareFile(context, file, "Share Analytics Report")
             } catch (e: Exception) {
-                // Error handling
+                // Handle error
             }
         }
     }
+}
+
+sealed class DashboardEvent {
+    data class FilterChanged(val filter: TimeFilter) : DashboardEvent()
+    data class ExportReport(val context: Context, val format: ExportFormat) : DashboardEvent()
+}
+
+enum class ExportFormat {
+    PDF, CSV
 }

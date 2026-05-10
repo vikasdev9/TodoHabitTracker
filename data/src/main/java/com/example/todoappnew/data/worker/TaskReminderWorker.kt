@@ -32,11 +32,16 @@ class TaskReminderWorker @AssistedInject constructor(
             return@withContext Result.success()
         }
 
+        // Update status to RUNNING
+        taskDao.updateTask(entity.copy(status = TaskStatus.RUNNING))
+
+        // Play alarm sound
         alarmManager.playAlarm()
 
+        // Show high priority notification
         notificationHelper.showNotification(
             taskId = entity.id.hashCode(),
-            title = entity.title,
+            title = "Task Reminder: ${entity.title}",
             message = entity.description,
             stringTaskId = entity.id
         )

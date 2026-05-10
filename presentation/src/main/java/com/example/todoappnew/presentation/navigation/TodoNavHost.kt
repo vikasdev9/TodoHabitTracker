@@ -11,6 +11,8 @@ import com.example.todoappnew.presentation.ui.screens.home.HomeScreen
 import com.example.todoappnew.presentation.ui.screens.task_detail.TaskDetailScreen
 import com.example.todoappnew.presentation.ui.screens.settings.SettingsScreen
 import com.example.todoappnew.presentation.ui.screens.dashboard.DashboardScreen
+import com.example.todoappnew.presentation.ui.screens.calendar.CalendarScreen
+import com.example.todoappnew.presentation.ui.screens.profile.ProfileScreen
 
 @Composable
 fun TodoNavHost(
@@ -55,6 +57,12 @@ fun TodoNavHost(
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() }
             )
+        }
+        composable(Screen.Calendar.route) {
+            CalendarScreen()
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen()
         }
     }
 }

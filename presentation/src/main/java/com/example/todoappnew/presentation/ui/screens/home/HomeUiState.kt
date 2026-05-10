@@ -1,5 +1,6 @@
 package com.example.todoappnew.presentation.ui.screens.home
 
+import com.example.todoappnew.domain.model.AppBackground
 import com.example.todoappnew.domain.model.Task
 import com.example.todoappnew.domain.model.TaskStatus
 import com.example.todoappnew.domain.model.ViewType
@@ -7,6 +8,7 @@ import com.example.todoappnew.domain.model.ViewType
 data class HomeUiState(
     val tasks: List<Task> = emptyList(),
     val viewType: ViewType = ViewType.LIST,
+    val background: AppBackground = AppBackground.DEFAULT,
     val isLoading: Boolean = false,
     val isSyncing: Boolean = false,
     val syncMessage: String? = null,

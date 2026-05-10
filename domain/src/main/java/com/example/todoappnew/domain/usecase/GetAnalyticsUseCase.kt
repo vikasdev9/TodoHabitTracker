@@ -53,6 +53,13 @@ class GetAnalyticsUseCase @Inject constructor(
                 }.timeInMillis
                 scheduledTime in thirtyDaysAgo..currentTime
             }
+            TimeFilter.YEAR -> {
+                // Last 365 days
+                val oneYearAgo = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, -365)
+                }.timeInMillis
+                scheduledTime in oneYearAgo..currentTime
+            }
         }
     }
 }
