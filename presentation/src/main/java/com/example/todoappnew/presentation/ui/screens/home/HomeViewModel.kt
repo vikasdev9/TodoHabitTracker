@@ -3,6 +3,7 @@ package com.example.todoappnew.presentation.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoappnew.data.local.datastore.PreferencesDataSource
+import com.example.todoappnew.domain.model.AppBackground
 import com.example.todoappnew.domain.model.Task
 import com.example.todoappnew.domain.model.TaskStatus
 import com.example.todoappnew.domain.model.ViewType
@@ -20,7 +21,8 @@ class HomeViewModel @Inject constructor(
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val syncCompletedTasksUseCase: SyncCompletedTasksUseCase,
-    private val preferencesDataSource: PreferencesDataSource
+    private val preferencesDataSource: PreferencesDataSource,
+    private val getBackgroundUseCase: GetBackgroundUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -32,13 +34,18 @@ class HomeViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<HomeUiState> = combine(
-        _searchQuery.debounce(300L),
-        _activeFilter,
-        _isSyncing,
-        _syncMessage,
-        preferencesDataSource.viewType
-    ) { query, filter, syncing, syncMsg, viewType ->
-        DataSnapshot(query, filter, syncing, syncMsg, viewType)
+        combine(
+            _searchQuery.debounce(300L),
+            _activeFilter,
+            _isSyncing,
+            _syncMessage,
+            preferencesDataSource.viewType
+        ) { query, filter, syncing, syncMsg, viewType ->
+            PartialSnapshot(query, filter, syncing, syncMsg, viewType)
+        },
+        getBackgroundUseCase()
+    ) { partial, background ->
+        DataSnapshot(partial.query, partial.filter, partial.isSyncing, partial.syncMessage, partial.viewType, background)
     }.flatMapLatest { snapshot ->
         getTasksUseCase().map { tasks ->
             val filteredTasks = tasks
@@ -53,6 +60,7 @@ class HomeViewModel @Inject constructor(
             HomeUiState(
                 tasks = filteredTasks,
                 viewType = snapshot.viewType,
+                background = snapshot.background,
                 searchQuery = snapshot.query,
                 activeFilter = snapshot.filter,
                 isSyncing = snapshot.isSyncing,
@@ -110,11 +118,20 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private data class DataSnapshot(
+    private data class PartialSnapshot(
         val query: String,
         val filter: TaskStatus?,
         val isSyncing: Boolean,
         val syncMessage: String?,
         val viewType: ViewType
+    )
+
+    private data class DataSnapshot(
+        val query: String,
+        val filter: TaskStatus?,
+        val isSyncing: Boolean,
+        val syncMessage: String?,
+        val viewType: ViewType,
+        val background: AppBackground
     )
 }

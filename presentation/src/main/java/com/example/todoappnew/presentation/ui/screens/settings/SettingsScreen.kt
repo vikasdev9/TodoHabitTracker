@@ -1,5 +1,6 @@
 package com.example.todoappnew.presentation.ui.screens.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -159,7 +162,14 @@ fun BackgroundSettingsSection(
             AppBackground.MIDNIGHT to "Midnight",
             AppBackground.LAVENDER to "Lavender",
             AppBackground.SHANGHAI to "Shanghai",
-            AppBackground.TOKYO to "Tokyo"
+            AppBackground.TOKYO to "Tokyo",
+            AppBackground.SAN_FRANCISCO to "San Francisco",
+            AppBackground.SYDNEY to "Sydney",
+            AppBackground.SPRING to "Spring",
+            AppBackground.SUMMER to "Summer",
+            AppBackground.AUTUMN to "Autumn",
+            AppBackground.WINTER to "Winter",
+            AppBackground.AURORA_SKY to "Aurora Sky"
         )
 
         LazyVerticalGrid(
@@ -187,20 +197,32 @@ fun BackgroundThumbnail(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val backgroundImage = BackgroundProvider.getBackgroundImage(bg)
+    val backgroundBrush = BackgroundProvider.getBackgroundBrush(bg)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.6f)
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
-            .background(BackgroundProvider.getBackgroundBrush(bg)),
+            .background(backgroundBrush),
         contentAlignment = Alignment.Center
     ) {
+        if (backgroundImage != null) {
+            Image(
+                painter = painterResource(id = backgroundImage),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
         // Overlay for label and selection
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.2f))
+                .background(Color.Black.copy(alpha = 0.4f))
         )
         
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

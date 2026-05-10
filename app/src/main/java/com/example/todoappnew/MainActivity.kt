@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -27,7 +26,8 @@ import com.example.todoappnew.domain.model.AppTheme
 import com.example.todoappnew.presentation.ui.screens.home.HomeViewModel
 import com.example.todoappnew.presentation.ui.screens.home.HomeEvent
 import com.example.todoappnew.presentation.ui.screens.settings.SettingsViewModel
-import com.example.todoappnew.presentation.util.BackgroundProvider
+import com.example.todoappnew.presentation.MainViewModel
+import com.example.todoappnew.presentation.ui.components.PremiumBackground
 import com.example.todoappnew.util.DynamicIconManager
 import com.example.todoappnew.presentation.ui.components.GlassmorphicBottomBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,8 +54,11 @@ class MainActivity : ComponentActivity() {
         )
         
         setContent {
+            val mainViewModel: MainViewModel = hiltViewModel()
+            val currentTheme by mainViewModel.theme.collectAsState()
+            val currentBackground by mainViewModel.background.collectAsState()
+
             val settingsViewModel: SettingsViewModel = hiltViewModel()
-            val settingsState by settingsViewModel.uiState.collectAsState()
             
             LaunchedEffect(Unit) {
                 settingsViewModel.themeChangedEvent.collectLatest { theme ->
@@ -63,7 +66,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val darkTheme = when (settingsState.theme) {
+            val darkTheme = when (currentTheme) {
                 AppTheme.LIGHT -> false
                 AppTheme.DARK -> true
                 AppTheme.SYSTEM -> isSystemInDarkTheme()
@@ -85,21 +88,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Transparent
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        // Global Background implementation using Brush (Gradient)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(BackgroundProvider.getBackgroundBrush(settingsState.background))
-                        )
-
-                        // Subtle overlay to ensure UI elements are readable
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
-                        )
-
+                    PremiumBackground(background = currentBackground) {
                         ModalNavigationDrawer(
                             drawerState = drawerState,
                             drawerContent = {

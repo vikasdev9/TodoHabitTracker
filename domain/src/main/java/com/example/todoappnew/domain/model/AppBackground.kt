@@ -16,6 +16,7 @@ enum class AppBackground {
     SPRING,
     SUMMER,
     AUTUMN,
-    WINTER
+    WINTER,
+    AURORA_SKY
 }
 

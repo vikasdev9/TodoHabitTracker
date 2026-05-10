@@ -38,7 +38,7 @@ fun HomeScreen(
     val totalCount = state.tasks.size
     val completionPercentage = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
-    PremiumBackground {
+    PremiumBackground(background = state.background) {
         Scaffold(
             containerColor = Color.Transparent,
             floatingActionButton = {

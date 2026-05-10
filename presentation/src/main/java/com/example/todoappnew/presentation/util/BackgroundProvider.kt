@@ -3,6 +3,7 @@ package com.example.todoappnew.presentation.util
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.example.todoappnew.domain.model.AppBackground
+import com.example.todoappnew.presentation.R
 
 object BackgroundProvider {
     fun getBackgroundBrush(background: AppBackground): Brush {
@@ -23,6 +24,19 @@ object BackgroundProvider {
             AppBackground.SUMMER -> Brush.verticalGradient(listOf(Color(0xFFFDC830), Color(0xFFF37335)))
             AppBackground.AUTUMN -> Brush.verticalGradient(listOf(Color(0xFFe65c00), Color(0xFFF9D423)))
             AppBackground.WINTER -> Brush.verticalGradient(listOf(Color(0xFF2193b0), Color(0xFF6dd5ed)))
+            AppBackground.AURORA_SKY -> Brush.verticalGradient(listOf(Color(0xFF1a2a6c), Color(0xFFb21f1f), Color(0xFFfdbb2d)))
+        }
+    }
+
+    fun getBackgroundImage(background: AppBackground): Int? {
+        return when (background) {
+            AppBackground.AURORA_SKY -> R.drawable.aurorasky
+            AppBackground.OCEAN -> R.drawable.oceanimage
+            AppBackground.SHANGHAI -> R.drawable.shanghaifinancealdistrict
+            AppBackground.TOKYO -> R.drawable.tokoyo
+            AppBackground.SYDNEY -> R.drawable.sydney
+            AppBackground.SAN_FRANCISCO -> R.drawable.sanfrancisco
+            else -> null
         }
     }
 
@@ -30,7 +44,7 @@ object BackgroundProvider {
         return when (background) {
             AppBackground.DEFAULT -> listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB))
             AppBackground.AURORA -> listOf(Color(0xFF004D40), Color(0xFF64FFDA))
-            AppBackground.SUNSET -> listOf(Color(0xFFFF5722), Color(0xFFFFEB3B))
+            AppBackground.SUNSET -> listOf(Color(0xFFFF5722), Color(0xFFFF9800))
             AppBackground.OCEAN -> listOf(Color(0xFF01579B), Color(0xFF03A9F4))
             AppBackground.MINT -> listOf(Color(0xFFE8F5E9), Color(0xFF81C784))
             AppBackground.PEACH -> listOf(Color(0xFFFFF3E0), Color(0xFFFFAB91))
@@ -44,6 +58,7 @@ object BackgroundProvider {
             AppBackground.SUMMER -> listOf(Color(0xFFFDC830), Color(0xFFF37335))
             AppBackground.AUTUMN -> listOf(Color(0xFFe65c00), Color(0xFFF9D423))
             AppBackground.WINTER -> listOf(Color(0xFF2193b0), Color(0xFF6dd5ed))
+            AppBackground.AURORA_SKY -> listOf(Color(0xFF1a2a6c), Color(0xFFfdbb2d))
         }
     }
 }

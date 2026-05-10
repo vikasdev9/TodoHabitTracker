@@ -1,5 +1,6 @@
 package com.example.todoappnew.presentation.ui.screens.profile
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +38,7 @@ import com.example.todoappnew.presentation.ui.theme.GlassCardBg
 import com.example.todoappnew.presentation.ui.theme.NeonPink
 import com.example.todoappnew.presentation.ui.theme.NeonPurple
 import com.example.todoappnew.presentation.ui.theme.TodoAppTheme
+import com.example.todoappnew.presentation.util.BackgroundProvider
 
 @Composable
 fun ProfileScreen(
@@ -65,7 +67,7 @@ fun ProfileScreenContent(
 ) {
     var displayName by remember { mutableStateOf("vikaschauhan0368") }
 
-    PremiumBackground {
+    PremiumBackground(background = background) {
         Scaffold(
             containerColor = Color.Transparent,
             contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -470,25 +472,6 @@ fun CompactThemeCard(
 }
 
 @Composable
-fun ThemeCard(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Box(
-        modifier = modifier
-            .height(80.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) NeonPink else GlassCardBg)
-            .border(1.dp, if (isSelected) NeonPink else Color.Transparent, RoundedCornerShape(20.dp))
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, null, tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f))
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(label, style = MaterialTheme.typography.labelMedium, color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f))
-        }
-    }
-}
-
-@Composable
 fun AccentColorSection() {
 
     val colors = listOf(
@@ -796,28 +779,57 @@ fun BackgroundCard(
     modifier: Modifier,
     onClick: () -> Unit
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "GlowTransition")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "GlowAlpha"
+    )
 
     Box(
         modifier = modifier
-            .height(108.dp)
+            .height(110.dp)
             .clip(RoundedCornerShape(24.dp))
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) Color(0xFFFF5C93) else Color.Transparent,
-                shape = RoundedCornerShape(24.dp)
+            .then(
+                if (isSelected) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = NeonPink.copy(alpha = glowAlpha),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                }
             )
             .clickable { onClick() }
     ) {
+        // Background Preview (Gradient or Image)
+        val backgroundImage = BackgroundProvider.getBackgroundImage(bg)
+        
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundProvider.getBackgroundBrush(bg))
+        ) {
+            if (backgroundImage != null) {
+                Image(
+                    painter = painterResource(id = backgroundImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
 
-        // Background Preview
-//        Image(
-//            painter = painterResource(id = bg.previewRes),
-//            contentDescription = null,
-//            modifier = Modifier.fillMaxSize(),
-//            contentScale = ContentScale.Crop
-//        )
-
-        // Dark overlay
+        // Glassmorphism overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -825,7 +837,7 @@ fun BackgroundCard(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.45f)
+                            Color.Black.copy(alpha = 0.6f)
                         )
                     )
                 )
@@ -838,31 +850,29 @@ fun BackgroundCard(
                 .lowercase()
                 .replaceFirstChar { it.uppercase() },
             color = Color.White,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 10.dp)
+                .padding(bottom = 12.dp)
         )
 
         // Selected check
         if (isSelected) {
-
             Box(
                 modifier = Modifier
                     .padding(8.dp)
-                    .size(28.dp)
+                    .size(24.dp)
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(NeonPink)
                     .align(Alignment.TopEnd),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = Icons.Rounded.Check,
                     contentDescription = null,
-                    tint = Color(0xFFFF5C93),
-                    modifier = Modifier.size(18.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
