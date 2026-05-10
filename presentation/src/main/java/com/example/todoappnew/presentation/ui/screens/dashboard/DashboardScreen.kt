@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -31,11 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todoappnew.domain.model.TimeFilter
-import com.example.todoappnew.presentation.ui.components.GlassCard
+import com.example.todoappnew.presentation.ui.components.PastelCard
 import com.example.todoappnew.presentation.ui.components.PremiumBackground
-import com.example.todoappnew.presentation.ui.theme.NeonPink
-import com.example.todoappnew.presentation.ui.theme.NeonPurple
-import com.example.todoappnew.presentation.ui.theme.NeonCyan
+import com.example.todoappnew.presentation.ui.theme.*
 import com.example.todoappnew.domain.model.CategoryStats
 import com.example.todoappnew.domain.model.ProductivityInsights
 import androidx.compose.foundation.Canvas
@@ -113,7 +112,7 @@ fun DashboardTopBar(
         title = {},
         navigationIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = Color.White)
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = PastelNavy)
             }
         },
         actions = {
@@ -122,9 +121,9 @@ fun DashboardTopBar(
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .background(PastelCream.copy(alpha = 0.5f))
             ) {
-                Icon(Icons.Default.Download, contentDescription = "Export", tint = Color.White)
+                Icon(Icons.Default.Download, contentDescription = "Export", tint = PastelNavy)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -137,15 +136,15 @@ fun DashboardHeaderSection() {
         Text(
             text = "Analytics Dashboard",
             style = MaterialTheme.typography.headlineLarge.copy(
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 32.sp
             ),
-            color = Color.White
+            color = PastelNavy
         )
         Text(
             text = "Track your productivity and task insights.",
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White.copy(alpha = 0.6f)
+            color = PastelSubHeading
         )
     }
 }
@@ -157,12 +156,14 @@ fun DashboardTimeFilterTabs(
 ) {
     val filters = TimeFilter.entries
     
-    GlassCard(
+    PastelCard(
         modifier = Modifier
             .padding(horizontal = 24.dp, vertical = 8.dp)
             .fillMaxWidth()
             .height(56.dp),
-        cornerRadius = 28.dp
+        backgroundColor = PastelCreamAlt,
+        cornerRadius = 28.dp,
+        elevation = 2.dp
     ) {
         Row(
             modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -171,12 +172,12 @@ fun DashboardTimeFilterTabs(
             filters.forEach { filter ->
                 val isSelected = filter == selectedFilter
                 val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) NeonPink else Color.Transparent,
+                    targetValue = if (isSelected) Color.White else Color.Transparent,
                     animationSpec = tween(300),
                     label = "TabBackground"
                 )
                 val contentColor by animateColorAsState(
-                    targetValue = if (isSelected) Color.White else Color.White.copy(alpha = 0.5f),
+                    targetValue = if (isSelected) PastelNavy else PastelSubHeading,
                     animationSpec = tween(300),
                     label = "TabContent"
                 )
@@ -187,12 +188,15 @@ fun DashboardTimeFilterTabs(
                         .fillMaxHeight()
                         .clip(CircleShape)
                         .background(backgroundColor)
+                        .then(if (isSelected) Modifier.shadow(2.dp, CircleShape) else Modifier)
                         .clickable { onFilterSelected(filter) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = filter.name.lowercase().replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                        ),
                         color = contentColor
                     )
                 }
@@ -209,14 +213,14 @@ fun SummaryStatsSection(state: DashboardUiState) {
                 label = "Total",
                 value = state.analyticsData.total,
                 icon = Icons.AutoMirrored.Rounded.List,
-                color = NeonCyan,
+                color = PastelBlue,
                 modifier = Modifier.weight(1f)
             )
             AnalyticsSummaryCard(
                 label = "Completed",
                 value = state.analyticsData.completed,
                 icon = Icons.Rounded.CheckCircle,
-                color = Color(0xFF43C97A),
+                color = PastelGreen,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -226,14 +230,14 @@ fun SummaryStatsSection(state: DashboardUiState) {
                 label = "Pending",
                 value = state.analyticsData.pending,
                 icon = Icons.Rounded.Pending,
-                color = Color(0xFFF5B544),
+                color = PastelOrange,
                 modifier = Modifier.weight(1f)
             )
             AnalyticsSummaryCard(
                 label = "Missed",
                 value = state.analyticsData.missed,
                 icon = Icons.Rounded.Error,
-                color = NeonPink,
+                color = PastelPink,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -254,8 +258,9 @@ fun AnalyticsSummaryCard(
         label = "Counter"
     )
 
-    GlassCard(
+    PastelCard(
         modifier = modifier.height(110.dp),
+        backgroundColor = PastelCream,
         cornerRadius = 24.dp
     ) {
         Column(
@@ -273,7 +278,7 @@ fun AnalyticsSummaryCard(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(color.copy(alpha = 0.2f)),
+                        .background(color.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(icon, null, tint = color, modifier = Modifier.size(18.dp))
@@ -282,14 +287,14 @@ fun AnalyticsSummaryCard(
                 Text(
                     text = animatedValue.toString(),
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color = PastelNavy
                 )
             }
             
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White.copy(alpha = 0.5f)
+                color = PastelSubHeading
             )
         }
     }
@@ -303,8 +308,9 @@ fun MainChartsSection(state: DashboardUiState) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        GlassCard(
+        PastelCard(
             modifier = Modifier.weight(1.2f).height(240.dp),
+            backgroundColor = PastelCreamAlt,
             cornerRadius = 32.dp
         ) {
             Column(
@@ -313,8 +319,8 @@ fun MainChartsSection(state: DashboardUiState) {
             ) {
                 Text(
                     "Task Distribution",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = PastelNavy,
                     modifier = Modifier.align(Alignment.Start)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -330,20 +336,21 @@ fun MainChartsSection(state: DashboardUiState) {
                         Text(
                             text = state.analyticsData.total.toString(),
                             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White
+                            color = PastelNavy
                         )
                         Text(
                             "Total",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.5f)
+                            color = PastelSubHeading
                         )
                     }
                 }
             }
         }
 
-        GlassCard(
+        PastelCard(
             modifier = Modifier.weight(0.8f).height(240.dp),
+            backgroundColor = PastelCreamAlt,
             cornerRadius = 32.dp
         ) {
             Column(
@@ -353,8 +360,8 @@ fun MainChartsSection(state: DashboardUiState) {
             ) {
                 Text(
                     "Productivity",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = PastelNavy,
                     modifier = Modifier.align(Alignment.Start)
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -365,12 +372,12 @@ fun MainChartsSection(state: DashboardUiState) {
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 48.sp
                     ),
-                    color = NeonPink
+                    color = PastelPink
                 )
                 Text(
                     "SCORE",
                     style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = PastelSubHeading
                 )
                 
                 Spacer(modifier = Modifier.weight(1f))
@@ -378,8 +385,8 @@ fun MainChartsSection(state: DashboardUiState) {
                 LinearProgressIndicator(
                     progress = { state.productivityInsights.productivityScore / 100f },
                     modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                    color = NeonPink,
-                    trackColor = Color.White.copy(alpha = 0.1f)
+                    color = PastelPink,
+                    trackColor = PastelCreamDark
                 )
             }
         }
@@ -405,7 +412,7 @@ fun AnalyticsDonutChart(
         val strokeWidth = 35f
         
         drawArc(
-            color = Color(0xFF43C97A),
+            color = PastelGreen,
             startAngle = -90f,
             sweepAngle = animateCompleted.value,
             useCenter = false,
@@ -413,7 +420,7 @@ fun AnalyticsDonutChart(
         )
         
         drawArc(
-            color = Color(0xFFF5B544),
+            color = PastelOrange,
             startAngle = -90f + animateCompleted.value,
             sweepAngle = animatePending.value,
             useCenter = false,
@@ -421,7 +428,7 @@ fun AnalyticsDonutChart(
         )
         
         drawArc(
-            color = NeonPink,
+            color = PastelPink,
             startAngle = -90f + animateCompleted.value + animatePending.value,
             sweepAngle = 360f - animateCompleted.value - animatePending.value,
             useCenter = false,
@@ -435,7 +442,7 @@ fun ProductivityInsightsSection(insights: ProductivityInsights) {
     Text(
         "Productivity Insights",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = Color.White,
+        color = PastelNavy,
         modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
     )
     
@@ -448,7 +455,7 @@ fun ProductivityInsightsSection(insights: ProductivityInsights) {
                 title = "Current Streak",
                 value = "${insights.currentStreak} Days",
                 icon = Icons.Rounded.Whatshot,
-                color = Color(0xFFFF9800)
+                color = PastelOrange
             )
         }
         item {
@@ -456,7 +463,7 @@ fun ProductivityInsightsSection(insights: ProductivityInsights) {
                 title = "Longest Streak",
                 value = "${insights.longestStreak} Days",
                 icon = Icons.Rounded.EmojiEvents,
-                color = Color(0xFFFFD700)
+                color = PastelPurple
             )
         }
         item {
@@ -464,7 +471,7 @@ fun ProductivityInsightsSection(insights: ProductivityInsights) {
                 title = "Completion",
                 value = "${insights.completionPercentage.toInt()}%",
                 icon = Icons.Rounded.DonutLarge,
-                color = NeonCyan
+                color = PastelBlue
             )
         }
         item {
@@ -472,7 +479,7 @@ fun ProductivityInsightsSection(insights: ProductivityInsights) {
                 title = "Missed Ratio",
                 value = "${(insights.missedTaskRatio * 100).toInt()}%",
                 icon = Icons.AutoMirrored.Rounded.TrendingDown,
-                color = NeonPink
+                color = PastelPink
             )
         }
     }
@@ -485,15 +492,16 @@ fun AnalyticsInsightCard(
     icon: ImageVector,
     color: Color
 ) {
-    GlassCard(
+    PastelCard(
         modifier = Modifier.width(160.dp).height(100.dp),
+        backgroundColor = PastelCream,
         cornerRadius = 24.dp
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Icon(icon, null, tint = color, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.weight(1f))
-            Text(value, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
-            Text(title, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.5f))
+            Text(value, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = PastelNavy)
+            Text(title, style = MaterialTheme.typography.labelSmall, color = PastelSubHeading)
         }
     }
 }
@@ -503,12 +511,13 @@ fun CategoryBreakdownSection(categories: List<CategoryStats>) {
     Text(
         "Category Breakdown",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = Color.White,
+        color = PastelNavy,
         modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
     )
 
-    GlassCard(
+    PastelCard(
         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+        backgroundColor = PastelCream,
         cornerRadius = 32.dp
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -524,20 +533,30 @@ fun CategoryBreakdownSection(categories: List<CategoryStats>) {
 
 @Composable
 fun AnalyticsCategoryRow(category: CategoryStats) {
+    val color = remember(category.category) {
+        when (category.category) {
+            "Work" -> PastelPurple
+            "Personal" -> PastelPink
+            "Health" -> PastelGreen
+            "Study" -> PastelBlue
+            else -> PastelOrange
+        }
+    }
+
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(category.category, color = Color.White, style = MaterialTheme.typography.bodyMedium)
-            Text("${category.count} tasks", color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
+            Text(category.category, color = PastelNavy, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+            Text("${category.count} tasks", color = PastelSubHeading, style = MaterialTheme.typography.bodySmall)
         }
         Spacer(modifier = Modifier.height(8.dp))
         LinearProgressIndicator(
             progress = { (category.count / 20f).coerceIn(0f, 1f) },
-            modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
-            color = Color(category.color),
-            trackColor = Color.White.copy(alpha = 0.05f)
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+            color = color,
+            trackColor = PastelCreamDark
         )
     }
 }
@@ -547,12 +566,13 @@ fun WeeklyActivitySection(weeklyProgress: List<com.example.todoappnew.domain.mod
     Text(
         "Weekly Activity",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = Color.White,
+        color = PastelNavy,
         modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
     )
 
-    GlassCard(
+    PastelCard(
         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth().height(200.dp),
+        backgroundColor = PastelCream,
         cornerRadius = 32.dp
     ) {
         Row(
@@ -580,12 +600,12 @@ fun AnalyticsBarItem(data: com.example.todoappnew.domain.model.ProgressData) {
                 .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(NeonPurple, NeonPink)
+                        colors = listOf(PastelPurple, PastelPink)
                     )
                 )
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(data.label, color = Color.White.copy(alpha = 0.6f), style = MaterialTheme.typography.labelSmall)
+        Text(data.label, color = PastelSubHeading, style = MaterialTheme.typography.labelSmall)
     }
 }
 
@@ -594,7 +614,7 @@ fun SmartInsightsSection() {
     Text(
         "Smart Insights",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = Color.White,
+        color = PastelNavy,
         modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 12.dp)
     )
 
@@ -606,19 +626,19 @@ fun SmartInsightsSection() {
             title = "Most Productive Day",
             description = "You complete 40% more tasks on Tuesdays.",
             icon = Icons.Rounded.Lightbulb,
-            color = Color(0xFFF5B544)
+            color = PastelOrange
         )
         DashboardInsightAlertCard(
             title = "Morning Person",
             description = "Most of your tasks are finished before 11:00 AM.",
             icon = Icons.Rounded.WbSunny,
-            color = NeonCyan
+            color = PastelBlue
         )
         DashboardInsightAlertCard(
             title = "Upcoming Deadline",
             description = "You have 5 high priority tasks due in next 48 hours.",
             icon = Icons.Rounded.Warning,
-            color = NeonPink
+            color = PastelPink
         )
     }
 }
@@ -630,8 +650,9 @@ fun DashboardInsightAlertCard(
     icon: ImageVector,
     color: Color
 ) {
-    GlassCard(
+    PastelCard(
         modifier = Modifier.fillMaxWidth(),
+        backgroundColor = PastelCream,
         cornerRadius = 24.dp
     ) {
         Row(
@@ -649,8 +670,8 @@ fun DashboardInsightAlertCard(
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = Color.White)
-                Text(description, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.6f))
+                Text(title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = PastelNavy)
+                Text(description, style = MaterialTheme.typography.bodySmall, color = PastelSubHeading)
             }
         }
     }

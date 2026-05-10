@@ -28,3 +28,17 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+
+// Pastel Modern Palette
+val PastelNavy = Color(0xFF1F2430)
+val PastelSubHeading = Color(0xFF707A8A)
+val PastelCream = Color(0xFFF8EDE7)
+val PastelCreamAlt = Color(0xFFF7E8E1)
+val PastelCreamDark = Color(0xFFF4E3DD)
+
+// Pastel Chart Colors
+val PastelPurple = Color(0xFF9B5CF6)
+val PastelPink = Color(0xFFFF7AA2)
+val PastelOrange = Color(0xFFFFB86B)
+val PastelBlue = Color(0xFF7AB6FF)
+val PastelGreen = Color(0xFF6DD3A0)
