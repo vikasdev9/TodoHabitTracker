@@ -35,8 +35,8 @@ fun GlassCard(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.12f),
-                        Color.White.copy(alpha = 0.04f)
+                        Color.White.copy(alpha = 0.80f),
+                        Color.White.copy(alpha = 0.70f)
                     )
                 )
             )
